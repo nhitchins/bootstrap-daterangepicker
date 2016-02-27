@@ -47,6 +47,7 @@
         this.autoApply = false;
         this.singleDatePicker = false;
         this.showDropdowns = false;
+        this.showDateInputs = true;
         this.showWeekNumbers = false;
         this.showISOWeekNumbers = false;
         this.timePicker = false;
@@ -67,7 +68,7 @@
             this.drops = 'up';
 
         this.buttonClasses = 'btn btn-sm';
-        this.applyClass = 'btn-success';
+        this.applyClass = 'btn-primary';
         this.cancelClass = 'btn-default';
 
         this.locale = {
@@ -76,10 +77,10 @@
             applyLabel: 'Apply',
             cancelLabel: 'Cancel',
             weekLabel: 'W',
-            customRangeLabel: 'Custom Range',
+            customRangeLabel: 'Custom',
             daysOfWeek: moment.weekdaysMin(),
             monthNames: moment.monthsShort(),
-            firstDay: moment.localeData().firstDayOfWeek()
+            firstDay: 0 //moment.localeData().firstDayOfWeek()
         };
 
         this.callback = function() { };
@@ -101,9 +102,9 @@
         if (typeof options.template !== 'string' && !(options.template instanceof jQuery))
             options.template = '<div class="daterangepicker dropdown-menu">' +
                 '<div class="calendar left">' +
-                    '<div class="daterangepicker_input">' +
-                      '<input class="input-mini" type="text" name="daterangepicker_start" value="" />' +
-                      '<i class="fa fa-calendar glyphicon glyphicon-calendar"></i>' +
+                    '<div class="daterangepicker_input hidex">' +
+                      '<input class="input-mini form-control" type="text" name="daterangepicker_start" value="" />' +
+                      '<i class="icon-calendar"></i>' +
                       '<div class="calendar-time">' +
                         '<div></div>' +
                         '<i class="fa fa-clock-o glyphicon glyphicon-time"></i>' +
@@ -112,9 +113,9 @@
                     '<div class="calendar-table"></div>' +
                 '</div>' +
                 '<div class="calendar right">' +
-                    '<div class="daterangepicker_input">' +
-                      '<input class="input-mini" type="text" name="daterangepicker_end" value="" />' +
-                      '<i class="fa fa-calendar glyphicon glyphicon-calendar"></i>' +
+                    '<div class="daterangepicker_input hidex">' +
+                      '<input class="input-mini form-control" type="text" name="daterangepicker_end" value="" />' +
+                      '<i class="icon-calendar"></i>' +
                       '<div class="calendar-time">' +
                         '<div></div>' +
                         '<i class="fa fa-clock-o glyphicon glyphicon-time"></i>' +
@@ -215,6 +216,9 @@
         if (typeof options.drops === 'string')
             this.drops = options.drops;
 
+        if (typeof options.showDateInputs === 'boolean')
+            this.showDateInputs = options.showDateInputs;
+
         if (typeof options.showWeekNumbers === 'boolean')
             this.showWeekNumbers = options.showWeekNumbers;
 
@@ -301,11 +305,15 @@
 
                 if (typeof options.ranges[range][0] === 'string')
                     start = moment(options.ranges[range][0], this.locale.format);
+                else if (typeof options.ranges[range][0] === 'function')
+                    start = options.ranges[range][0].call()
                 else
                     start = moment(options.ranges[range][0]);
 
                 if (typeof options.ranges[range][1] === 'string')
                     end = moment(options.ranges[range][1], this.locale.format);
+                else if (typeof options.ranges[range][0] === 'function')
+                    end = options.ranges[range][1].call()
                 else
                     end = moment(options.ranges[range][1]);
 
@@ -324,7 +332,18 @@
                 // after the maximum, don't display this range option at all.
                 if ((this.minDate && end.isBefore(this.minDate)) || (maxDate && start.isAfter(maxDate)))
                     continue;
-                
+
+                // Wrap start/end ranges in functions as required
+                if (typeof options.ranges[range][0] === 'function')
+                    start = options.ranges[range][0]
+                else 
+                    start = function (){ return start; }
+
+                if (typeof options.ranges[range][1] === 'function')
+                    end = options.ranges[range][1]
+                else 
+                    end = function (){ return end; }
+
                 //Support unicode chars in the range names.
                 var elem = document.createElement('textarea');
                 elem.innerHTML = range;
@@ -371,6 +390,10 @@
             if (!this.timePicker) {
                 this.container.find('.ranges').hide();
             }
+        }
+
+        if (!this.showDateInputs) {
+            this.container.find('.daterangepicker_input input, .daterangepicker_input i').hide();
         }
 
         if ((typeof options.ranges === 'undefined' && !this.singleDatePicker) || this.alwaysShowCalendars) {
@@ -680,7 +703,7 @@
                 html += '<th></th>';
 
             if ((!minDate || minDate.isBefore(calendar.firstDay)) && (!this.linkedCalendars || side == 'left')) {
-                html += '<th class="prev available"><i class="fa fa-chevron-left glyphicon glyphicon-chevron-left"></i></th>';
+                html += '<th class="prev available"><i class="icon-arrow-left"></i></th>';
             } else {
                 html += '<th></th>';
             }
@@ -722,7 +745,7 @@
 
             html += '<th colspan="5" class="month">' + dateHtml + '</th>';
             if ((!maxDate || maxDate.isAfter(calendar.lastDay)) && (!this.linkedCalendars || side == 'right' || this.singleDatePicker)) {
-                html += '<th class="next available"><i class="fa fa-chevron-right glyphicon glyphicon-chevron-right"></i></th>';
+                html += '<th class="next available"><i class="icon-arrow-right"></i></th>';
             } else {
                 html += '<th></th>';
             }
@@ -1151,8 +1174,8 @@
                 this.updateView();
             } else {
                 var dates = this.ranges[label];
-                this.container.find('input[name=daterangepicker_start]').val(dates[0].format(this.locale.format));
-                this.container.find('input[name=daterangepicker_end]').val(dates[1].format(this.locale.format));
+                this.container.find('input[name=daterangepicker_start]').val(dates[0]().format(this.locale.format));
+                this.container.find('input[name=daterangepicker_end]').val(dates[1]().format(this.locale.format));
             }
             
         },
@@ -1164,13 +1187,14 @@
                 this.showCalendars();
             } else {
                 var dates = this.ranges[label];
-                this.startDate = dates[0];
-                this.endDate = dates[1];
+                this.startDate = dates[0]();
+                this.endDate = dates[1]();
 
-                if (!this.timePicker) {
-                    this.startDate.startOf('day');
-                    this.endDate.endOf('day');
-                }
+                // NEVER overwrite the ranges
+                // if (!this.timePicker) {
+                //     this.startDate.startOf('day');
+                //     this.endDate.endOf('day');
+                // }
 
                 if (!this.alwaysShowCalendars)
                     this.hideCalendars();
@@ -1325,14 +1349,14 @@
           var i = 0;
           for (var range in this.ranges) {
               if (this.timePicker) {
-                  if (this.startDate.isSame(this.ranges[range][0]) && this.endDate.isSame(this.ranges[range][1])) {
+                  if (this.startDate.isSame(this.ranges[range][0]()) && this.endDate.isSame(this.ranges[range][1]())) {
                       customRange = false;
                       this.chosenLabel = this.container.find('.ranges li:eq(' + i + ')').addClass('active').html();
                       break;
                   }
               } else {
                   //ignore times when comparing dates if time picker is not enabled
-                  if (this.startDate.format('YYYY-MM-DD') == this.ranges[range][0].format('YYYY-MM-DD') && this.endDate.format('YYYY-MM-DD') == this.ranges[range][1].format('YYYY-MM-DD')) {
+                  if (this.startDate.format('YYYY-MM-DD') == this.ranges[range][0]().format('YYYY-MM-DD') && this.endDate.format('YYYY-MM-DD') == this.ranges[range][1]().format('YYYY-MM-DD')) {
                       customRange = false;
                       this.chosenLabel = this.container.find('.ranges li:eq(' + i + ')').addClass('active').html();
                       break;
