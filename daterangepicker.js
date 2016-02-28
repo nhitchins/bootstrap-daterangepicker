@@ -6,6 +6,8 @@
 * @website: https://www.improvely.com/
 */
 
+// Forked to allow functions to be passed into ranges
+
 (function(root, factory) {
 
   if (typeof define === 'function' && define.amd) {
@@ -102,7 +104,7 @@
         if (typeof options.template !== 'string' && !(options.template instanceof jQuery))
             options.template = '<div class="daterangepicker dropdown-menu">' +
                 '<div class="calendar left">' +
-                    '<div class="daterangepicker_input hidex">' +
+                    '<div class="daterangepicker_input">' +
                       '<input class="input-mini form-control" type="text" name="daterangepicker_start" value="" />' +
                       '<i class="icon-calendar"></i>' +
                       '<div class="calendar-time">' +
@@ -113,7 +115,7 @@
                     '<div class="calendar-table"></div>' +
                 '</div>' +
                 '<div class="calendar right">' +
-                    '<div class="daterangepicker_input hidex">' +
+                    '<div class="daterangepicker_input">' +
                       '<input class="input-mini form-control" type="text" name="daterangepicker_end" value="" />' +
                       '<i class="icon-calendar"></i>' +
                       '<div class="calendar-time">' +
@@ -718,7 +720,7 @@
                 var inMinYear = currentYear == minYear;
                 var inMaxYear = currentYear == maxYear;
 
-                var monthHtml = '<select class="monthselect">';
+                var monthHtml = '<select class="form-control monthselect">';
                 for (var m = 0; m < 12; m++) {
                     if ((!inMinYear || m >= minDate.month()) && (!inMaxYear || m <= maxDate.month())) {
                         monthHtml += "<option value='" + m + "'" +
@@ -732,7 +734,7 @@
                 }
                 monthHtml += "</select>";
 
-                var yearHtml = '<select class="yearselect">';
+                var yearHtml = '<select class="form-control yearselect">';
                 for (var y = minYear; y <= maxYear; y++) {
                     yearHtml += '<option value="' + y + '"' +
                         (y === currentYear ? ' selected="selected"' : '') +

@@ -81,7 +81,7 @@
 
 @daterangepicker-control-border-size:          1px;
 @daterangepicker-control-border-color:         #ccc;
-@daterangepicker-control-border-radius:        4px;
+@daterangepicker-control-border-radius:        3px;
 
 @daterangepicker-control-active-border-size:   1px;
 @daterangepicker-control-active-border-color:  @brand-primary;;
@@ -328,6 +328,7 @@
   th {
     &.month {
       width: auto;
+      padding-top: 3px;
     }
   }
 
@@ -349,6 +350,7 @@
       height: auto;
       margin: 0;
       cursor: default;
+      display: inline-block;
     }
 
     &.monthselect {
@@ -370,9 +372,9 @@
   // Text Input Controls (above calendar)
   //
   .input-mini {
-    border: @daterangepicker-control-border-size solid @daterangepicker-control-border-color;
-    border-radius: @daterangepicker-control-border-radius;
-    color: @daterangepicker-control-color;
+    //border: @daterangepicker-control-border-size solid @daterangepicker-control-border-color;
+    //border-radius: @daterangepicker-control-border-radius;
+    //color: @daterangepicker-control-color;
     height: @daterangepicker-control-line-height;
     line-height: @daterangepicker-control-height;
     display: block;
@@ -383,10 +385,10 @@
     padding: 0 6px 0 28px;
     width: 100%;
 
-    &.active {
-      border: @daterangepicker-control-active-border-size solid @daterangepicker-control-active-border-color;
-      border-radius: @daterangepicker-control-active-border-radius;
-    }
+    // &.active {
+    //   border: @daterangepicker-control-active-border-size solid @daterangepicker-control-active-border-color;
+    //   border-radius: @daterangepicker-control-active-border-radius;
+    // }
   }
 
   .daterangepicker_input {
